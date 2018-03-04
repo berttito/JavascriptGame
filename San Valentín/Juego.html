@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script type="text/javascript">
+
+	(function(){
+		 'use strict';
+		  window.addEventListener('load',init,false);
+
+		  var canvas=null,ctx=null;
+		  var lastUpdate=0; 
+		  var pause=true; 
+		  var lastPress=null; 
+		  var mousex=0,mousey=0; 
+		  var score=0,counter=0; 
+		  var bgColor='#000'; 
+		  var player=new Circle(0,0,5); 
+		  var target=new Circle(100,100,40);
+		  //var target2=new Circle(180,200,40);
+		  //var target3=new Circle(300,135,40);
+		  //var target4=new Circle(196,45,40);   
+		  var iSight=new Image(); 
+		  iSight.src='mirilla.png'; 
+		  var iTarget=new Image();
+		  var iTarget2=new Image();
+		  var iTarget3=new Image();
+		  var iTarget4=new Image();
+		  var iBackground = new Image();
+		  var iMenuBackground = new Image();
+		  var iInstructions = new Image();
+		  iBackground.src = 'background.png'
+		  iMenuBackground.src = 'sanvalentin.jpg' 
+		  iInstructions.src = 'instrucciones.png';
+		  iTarget.src='pareja.png';
+		  //iTarget2.src='choni.png';
+		  //iTarget3.src='luna.png';
+		  //iTarget4.src='alex.png';
+
+
+		  var aShot = new Audio();
+		  aShot.src = 'golpe.mp3';
+
+		  /*var aBong= new Audio();
+		  aBong.src = 'bong.mp3';
+
+		  var aChomp= new Audio();
+		  aChomp.src = 'chomp.mp3';*/
+
+		  var SCENE_1 = 1, 
+			  SCENE_2 = 2,
+			  SCENE_3 = 3,
+			  KEY_ENTER = 1, 	 	     
+			  currentScene = 1;
+
+		function init(){
+		  canvas=document.getElementById('canvas'); 
+		  ctx=canvas.getContext('2d'); 
+		  //canvas.width=300; 
+		  //canvas.height=200; 
+
+		  enableInputs(); 
+		  run(); 
+		}
+
+		function random(max){
+		 return ~~(Math.random()*max); 
+		}
+
+		function run(){
+		 requestAnimationFrame(run);
+
+		  var now=Date.now(); 
+		  var deltaTime=(now-lastUpdate)/1000; 
+		  if(deltaTime>1)deltaTime=0; 
+		  	lastUpdate=now; 
+
+		  act(deltaTime); 
+		  paint(ctx); 
+		}
+
+		function act(deltaTime){
+
+		if(currentScene == SCENE_1){
+
+			if (lastPress === KEY_ENTER){ 
+				currentScene = SCENE_2; 
+				lastPress = null; 
+			} 
+		}else if(currentScene == SCENE_2){
+
+			if (lastPress === KEY_ENTER){ 
+				currentScene = SCENE_3; 				
+			} 
+		}else if(currentScene == SCENE_3){			
+		 		player.x=mousex;
+		 		player.y=mousey; 
+
+		 		if(player.x<0) 
+		 			player.x=0; 
+				if(player.x>canvas.width) 
+		 			player.x=canvas.width; 
+		 		if(player.y<0) 
+		 			player.y=0; 
+		 		if(player.y>canvas.height) 
+		 			player.y=canvas.height;
+
+		 		counter-=deltaTime; 
+		 		if(!pause){
+		 			if(lastPress==1){
+		   				bgColor='#333';
+		    				if(player.distance(target)<0){
+		     					score++;
+		     					aShot.play(); 
+		     					target.x=random(canvas.width/10-8)*10+target.radius; 
+		     					target.y=random(canvas.height/10-8)*10+target.radius; 
+		    				} 
+
+		    				/*if(player.distance(target2)<0){
+		     					score++;
+		     					aShot.play(); 
+		     					target2.x=random(canvas.width/10-8)*10+target2.radius; 
+		     					target2.y=random(canvas.height/10-8)*10+target2.radius; 
+		    				}
+
+		    				if(player.distance(target3)<0){
+		     					score =score+10;
+		     					aChomp.play(); 
+		     					target3.x=random(canvas.width/10-8)*10+target3.radius; 
+		     					target3.y=random(canvas.height/10-8)*10+target3.radius; 
+		    				} 
+
+		    				if(player.distance(target4)<0){
+		     					score=score-5;
+		     					aBong.play(); 
+		     					target4.x=random(canvas.width/10-8)*10+target4.radius; 
+		     					target4.y=random(canvas.height/10-8)*10+target4.radius; 
+		    				}*/  
+		  			} 
+		  			else 
+		  			bgColor='#000'; 
+
+		  			if(counter<=0){
+		  	 		pause=true; 
+		  			} 
+				}
+				else if(lastPress==1&&counter<-1){
+					pause=false; 
+					counter=15; 
+					score=0; 
+				} 
+				lastPress=null;			
+		}
+	} 
+
+	function paint(ctx){
+
+		if(currentScene == SCENE_1)
+		{
+			ctx.fillStyle=bgColor;
+			ctx.drawImage(iMenuBackground,0,0);
+			
+			// Draw title 
+			ctx.fillStyle = '#000000'; 
+			ctx.textAlign = 'center'; 
+			
+			ctx.font="30px Georgia";
+			ctx.fillText('PLAY', 270, 330); 
+		}
+
+		if(currentScene == SCENE_2)
+		{
+			ctx.fillStyle=bgColor;
+			ctx.drawImage(iInstructions,0,0);		
+		}
+
+		if(currentScene == SCENE_3){
+			ctx.fillStyle=bgColor;
+			ctx.drawImage(iBackground,0,0);
+			//ctx.fillRect(0,0,canvas.width,canvas.height); 
+
+			ctx.strokeStyle='#f00'; 
+			//target.stroke(ctx); 
+			if(counter > 8){
+				//iTarget.src='cani.png';
+		  		//iTarget2.src='choni.png';
+		  		//iTarget3.src='luna.png';	
+				target.drawImage(ctx,iTarget);
+				//target2.drawImage(ctx,iTarget2);
+				//target3.drawImage(ctx,iTarget3);
+			}		
+
+			if(counter < 8){
+				//iTarget.src='cani2.png';
+		  		//iTarget2.src='choni2.png';
+		  		//iTarget4.src='alex.png';
+				target.drawImage(ctx,iTarget);
+				//target2.drawImage(ctx,iTarget2);
+				//target4.drawImage(ctx,iTarget4);
+			}
+
+			ctx.strokeStyle='#000000'; 
+			//player.stroke(ctx); 
+			player.drawImage(ctx,iSight); 
+			ctx.fillStyle='#000000'; 
+			//ctx.fillText('Distance: '+player.distance(target).toFixed(1),0,10);
+			ctx.font="15px Georgia"
+			ctx.fillText('Score: '+score,40,30); 
+			if(counter>0) 
+				ctx.fillText('Time: '+counter.toFixed(1),300,30); 
+			else 
+				ctx.fillText('Time: 0.0',300,30); 
+			if(pause){
+				ctx.fillText('Score: '+score,canvas.width/2 ,canvas.height/2); 
+			if(counter<-1) 
+				ctx.fillText('CLICK TO START',canvas.width/2 ,canvas.height/2 + 30); 
+			} 
+		}
+	}
+
+	function enableInputs(){
+		document.addEventListener('mousemove',function(evt){
+			mousex=evt.pageX-canvas.offsetLeft; 
+			mousey=evt.pageY-canvas.offsetTop; 
+		},false); 
+		canvas.addEventListener('mousedown',function(evt){
+		lastPress=evt.which; 
+		},false);
+	}
+
+
+	function Circle(x,y,radius){
+		this.x=(x==null)?0:x;
+		this.y=(y==null)?0:y;
+		this.radius=(radius==null)?0:radius;
+	}
+
+	Circle.prototype.distance=function(circle){
+		if(circle!=null){
+			var dx=this.x-circle.x;
+			var dy=this.y-circle.y;
+			return (Math.sqrt(dx*dx+dy*dy)-(this.radius+circle.radius));
+		} 
+	}
+
+	Circle.prototype.stroke=function(ctx){
+		ctx.beginPath();
+		ctx.arc(this.x,this.y,this.radius,0,Math.PI*2,true);
+		ctx.stroke(); 
+	}
+
+	Circle.prototype.drawImage=function(ctx,img){
+		if(img.width)
+			ctx.drawImage(img,this.x-this.radius,this.y-this.radius);
+		else 
+			this.stroke(ctx); 
+	} 
+
+	window.requestAnimationFrame=(function(){
+		return window.requestAnimationFrame ||
+		window.webkitRequestAnimationFrame ||
+		window.mozRequestAnimationFrame ||
+		function(callback){window.setTimeout(callback,17);};
+	})();
+})(); 
+
+	</script>
+</head>
+<body>
+	<canvas id ="canvas" width="580px" height="400px";>Este navegador no puede utilizar canvas</canvas>
+</body>
+</html>
